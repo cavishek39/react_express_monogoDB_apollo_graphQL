@@ -9,46 +9,59 @@ const {
   GraphQLInt,
   GraphQLSchema,
   GraphQLID,
+  GraphQLList,
 } = graphql
 
 // Dummy Data
 
 const books = [
   {
+    id: '1',
     name: 'C',
     genre: 'ABC',
-    id: '1',
+    authorID: '1',
   },
   {
+    id: '2',
     name: 'C++',
     genre: 'ABC',
-    id: '2',
+    authorID: '2',
   },
   {
+    id: '3',
+    name: 'JS',
+    genre: 'Python',
+    authorID: '2',
+  },
+  {
+    id: '4',
     name: 'JAVA',
     genre: 'ABC',
-    id: '3',
+    authorID: '3',
   },
 ]
 
 const authors = [
   {
     id: '1',
-    name: 'ABC',
+    name: 'author-1',
     age: 18,
     mobile_no: 7897979793,
+    bookID: '1',
   },
   {
     id: '2',
-    name: 'ABC',
+    name: 'author-2',
     age: 12,
     mobile_no: 3897979793,
+    bookID: '2',
   },
   {
     id: '3',
-    name: 'ABC',
+    name: 'author-3',
     age: 14,
     mobile_no: 3897979745,
+    bookID: '3',
   },
 ]
 
@@ -59,6 +72,13 @@ const BookType = new GraphQLObjectType({
     id: { type: GraphQLID },
     name: { type: GraphQLString },
     genre: { type: GraphQLString },
+    author: {
+      type: AuthorType,
+      resolve(parents, args) {
+        console.log(parents)
+        return _.find(authors, { id: parents.authorID })
+      },
+    },
   }),
 })
 
@@ -70,6 +90,13 @@ const AuthorType = new GraphQLObjectType({
     name: { type: GraphQLString },
     age: { type: GraphQLInt },
     mobile_no: { type: GraphQLFloat },
+    book: {
+      type: GraphQLList(BookType),
+      resolve(parent, args) {
+        console.log(parent)
+        return _.filter(books, { authorID: parent.id })
+      },
+    },
   }),
 })
 
@@ -101,6 +128,18 @@ const RootQuery = new GraphQLObjectType({
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
         return _.find(authors, { id: args.id })
+      },
+    },
+    books: {
+      type: GraphQLList(BookType),
+      resolve(parent, args) {
+        return books
+      },
+    },
+    authors: {
+      type: GraphQLList(AuthorType),
+      resolve(parent, args) {
+        return authors
       },
     },
   },
